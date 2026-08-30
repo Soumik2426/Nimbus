@@ -18,6 +18,16 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7.4-alpine
+    container_name: product-management-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
   app:
     build:
       context: .
@@ -26,16 +36,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DB_URL: jdbc:mysql://db:3306/product_management
-      DB_USERNAME: Javauser
-      DB_PASSWORD: Soumik$4321@
-      JWT_SECRET: Stl8mM0qXk1MCXnwSP4W6GEuCPuvLUutu7E2GP0WeXk=
-      JWT_EXPIRATION: 86400000
-      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
 
 volumes:
   mysql_data:
+  redis_data:
