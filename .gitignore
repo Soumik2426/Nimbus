@@ -1,0 +1,16 @@
+# Local editor settings
+.idea/
+.vscode/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build and dependency folders
+node_modules/
+**/node_modules/
+target/
+**/target/
+frontend.local-backup/
+**/frontend.local-backup/
