@@ -50,7 +50,7 @@ function RegisterForm() {
 
       toast.success(response.message);
 
-      navigate("/login");
+      navigate(`/verify-otp?email=${encodeURIComponent(data.email)}`);
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ??

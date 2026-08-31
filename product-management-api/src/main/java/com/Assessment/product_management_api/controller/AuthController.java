@@ -41,7 +41,8 @@ public class AuthController {
     @PostMapping("/registerUser")
     public ResponseEntity<ApiResponse<UserResponse>> registerUser(@RequestBody @Valid RegisterRequest registerRequest){
         UserResponse userResponse = authService.registerUser(registerRequest);
-        return new ResponseEntity<>(new ApiResponse<>(userResponse, "Registered Successfully"), HttpStatus.CREATED);
+        otpService.sendOtp(userResponse.getEmail());
+        return new ResponseEntity<>(new ApiResponse<>(userResponse, "Account created. Check your email for the verification code."), HttpStatus.CREATED);
     }
 
     //To login
@@ -66,6 +67,7 @@ public class AuthController {
             throw new IllegalStateException("OTP service is not configured.");
         }
         otpService.verifyOtp(otpVerificationRequest.getEmail(), otpVerificationRequest.getOtp());
-        return ResponseEntity.ok(new ApiResponse<>("OTP verified successfully.", "OTP verified successfully."));
+        authService.verifyEmail(otpVerificationRequest.getEmail());
+        return ResponseEntity.ok(new ApiResponse<>("Email verified successfully.", "Email verified successfully."));
     }
 }

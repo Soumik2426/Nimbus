@@ -22,6 +22,7 @@ public class UserResponse {
     private String lastName;
     @Schema(example = "soumik@example.com")
     private String email;
+    private boolean emailVerified;
     @Schema(example = "USER")
     private Role role;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

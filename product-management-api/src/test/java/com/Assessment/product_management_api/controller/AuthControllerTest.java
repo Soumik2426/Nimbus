@@ -8,6 +8,7 @@ import com.Assessment.product_management_api.dto.response.LoginResponse;
 import com.Assessment.product_management_api.dto.response.UserResponse;
 import com.Assessment.product_management_api.entity.Role;
 import com.Assessment.product_management_api.service.AuthService;
+import com.Assessment.product_management_api.service.OtpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,13 +30,15 @@ class AuthControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private AuthService authService;
+    private OtpService otpService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         authService = mock(AuthService.class);
+        otpService = mock(OtpService.class);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new V1AuthController(authService))
+                .standaloneSetup(new V1AuthController(authService, otpService))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -43,14 +47,17 @@ class AuthControllerTest {
     void registerUserReturnsCreatedUser() throws Exception {
         RegisterRequest request = registerRequest();
         when(authService.registerUser(any(RegisterRequest.class))).thenReturn(userResponse());
+        when(otpService.sendOtp("soumik@example.com")).thenReturn("123456");
 
         mockMvc.perform(post("/api/v1/auth/registerUser")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Registered Successfully"))
+                .andExpect(jsonPath("$.message").value("Account created. Check your email for the verification code."))
                 .andExpect(jsonPath("$.data.email").value("soumik@example.com"))
                 .andExpect(jsonPath("$.data.role").value("USER"));
+
+        verify(otpService).sendOtp("soumik@example.com");
     }
 
     @Test

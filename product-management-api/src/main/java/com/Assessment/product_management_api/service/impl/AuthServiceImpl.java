@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
                 .email(savedUser.getEmail())
+                .emailVerified(savedUser.isEmailVerified())
                 .role(savedUser.getRole())
                 .createdAt(savedUser.getCreatedAt())
                 .updatedAt(savedUser.getUpdatedAt())
@@ -74,6 +75,10 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException("Invalid email or password");
         }
 
+        if (!user.isEmailVerified()) {
+            throw new IllegalArgumentException("Please verify your email address before signing in.");
+        }
+
         //To generate JWT token
         String token=jwtService.generateJwtToken(user);
         HelperResponse helperResponse=modelMapper.map(user, HelperResponse.class);
@@ -82,5 +87,14 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .user(helperResponse)
                 .build();
+    }
+
+    @Override
+    public void verifyEmail(String email) {
+        UserEntity user = userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found for this email address."));
+        user.setEmailVerified(true);
+        userRepository.save(user);
+        log.info("Email verified for user id {}", user.getId());
     }
 }

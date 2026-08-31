@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuthServiceTest {
@@ -70,6 +71,7 @@ class AuthServiceTest {
     @Test
     void loginReturnsTokenAndUser() {
         UserEntity userEntity = userEntity();
+        userEntity.setEmailVerified(true);
         when(userRepository.findByEmail(userEntity.getEmail())).thenReturn(Optional.of(userEntity));
         when(passwordEncoder.matches("StrongPass@123", "encoded-password")).thenReturn(true);
         when(jwtService.generateJwtToken(userEntity)).thenReturn("jwt-token");
@@ -87,6 +89,26 @@ class AuthServiceTest {
         when(passwordEncoder.matches("StrongPass@123", "encoded-password")).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> authService.login(loginRequest()));
+    }
+
+    @Test
+    void loginRejectsUnverifiedEmail() {
+        UserEntity userEntity = userEntity();
+        when(userRepository.findByEmail(userEntity.getEmail())).thenReturn(Optional.of(userEntity));
+        when(passwordEncoder.matches("StrongPass@123", "encoded-password")).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> authService.login(loginRequest()));
+    }
+
+    @Test
+    void verifyEmailMarksUserAsVerified() {
+        UserEntity userEntity = userEntity();
+        when(userRepository.findByEmail(userEntity.getEmail())).thenReturn(Optional.of(userEntity));
+
+        authService.verifyEmail(userEntity.getEmail());
+
+        assertEquals(true, userEntity.isEmailVerified());
+        verify(userRepository).save(userEntity);
     }
 
     private RegisterRequest registerRequest() {

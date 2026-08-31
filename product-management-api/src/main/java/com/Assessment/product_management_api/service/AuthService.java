@@ -12,4 +12,6 @@ public interface AuthService {
 
     //To login
     public LoginResponse login(LoginRequest loginRequest);
+
+    void verifyEmail(String email);
 }

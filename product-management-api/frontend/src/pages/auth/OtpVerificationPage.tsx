@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, ShieldCheck, KeyRound } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -18,6 +18,8 @@ type OtpFormData = z.infer<typeof otpSchema>;
 
 function OtpVerificationPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const registeredEmail = searchParams.get("email") ?? "";
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -30,7 +32,7 @@ function OtpVerificationPage() {
   } = useForm<OtpFormData>({
     resolver: zodResolver(otpSchema),
     defaultValues: {
-      email: "",
+      email: registeredEmail,
       otp: "",
     },
   });
@@ -81,7 +83,7 @@ function OtpVerificationPage() {
             </div>
             <h1 className="text-5xl font-black leading-tight">Secure<br />Verification</h1>
             <p className="mt-6 max-w-md text-lg leading-8 text-indigo-100">
-              We send a one-time password to the email address you provide so only the real account owner can continue.
+              We've sent a one-time password to your email. Verify it to activate your Nimbus account.
             </p>
           </div>
           <p className="text-sm text-indigo-100">Redis protected • Email delivery • 5 minute validity</p>
@@ -96,7 +98,7 @@ function OtpVerificationPage() {
       >
         <div className="w-full max-w-md">
           <h2 className="text-4xl font-black text-slate-900">Verify OTP</h2>
-          <p className="mt-2 text-slate-500">Enter your email and the 6-digit code sent to it.</p>
+          <p className="mt-2 text-slate-500">Enter the 6-digit code sent to your email to activate your account.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-6">
             <div>
@@ -107,6 +109,7 @@ function OtpVerificationPage() {
                   type="email"
                   placeholder="Enter your email"
                   {...register("email")}
+                  readOnly={Boolean(registeredEmail)}
                   className="h-14 w-full bg-transparent px-3 outline-none"
                 />
               </div>
@@ -122,7 +125,7 @@ function OtpVerificationPage() {
                   disabled={isSending}
                   className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSending ? "Sending..." : "Send OTP"}
+                  {isSending ? "Sending..." : otpSent || registeredEmail ? "Resend code" : "Send code"}
                 </button>
               </div>
 
@@ -142,7 +145,7 @@ function OtpVerificationPage() {
 
             {otpSent && (
               <p className="text-sm text-emerald-600">
-                OTP sent successfully. Check your inbox for the 6-digit code.
+                A fresh verification code was sent. Check your inbox and spam folder.
               </p>
             )}
 

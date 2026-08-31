@@ -40,7 +40,7 @@ public class V1AuthController {
     }
 
     @PostMapping("/registerUser")
-    @Operation(summary = "Register a new user", description = "Creates a new USER account with validation and password hashing.")
+    @Operation(summary = "Register a new user", description = "Creates a new USER account and emails a verification OTP.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Registered successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation error"),
@@ -48,7 +48,8 @@ public class V1AuthController {
     })
     public ResponseEntity<ApiResponse<UserResponse>> registerUser(@RequestBody @Valid RegisterRequest registerRequest){
         UserResponse userResponse = authService.registerUser(registerRequest);
-        return new ResponseEntity<>(new ApiResponse<>(userResponse, "Registered Successfully"), HttpStatus.CREATED);
+        otpService.sendOtp(userResponse.getEmail());
+        return new ResponseEntity<>(new ApiResponse<>(userResponse, "Account created. Check your email for the verification code."), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
@@ -88,6 +89,7 @@ public class V1AuthController {
             throw new IllegalStateException("OTP service is not configured.");
         }
         otpService.verifyOtp(otpVerificationRequest.getEmail(), otpVerificationRequest.getOtp());
-        return ResponseEntity.ok(new ApiResponse<>("OTP verified successfully.", "OTP verified successfully."));
+        authService.verifyEmail(otpVerificationRequest.getEmail());
+        return ResponseEntity.ok(new ApiResponse<>("Email verified successfully.", "Email verified successfully."));
     }
 }
