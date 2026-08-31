@@ -1,19 +1,18 @@
 services:
   db:
-    image: mysql:8.4
+    image: postgres:16-alpine
     container_name: product-management-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: product_management
-      MYSQL_USER: Javauser
-      MYSQL_PASSWORD: Soumik$4321@
-      MYSQL_ROOT_PASSWORD: rootpassword
+      POSTGRES_DB: product_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
     ports:
-      - "3306:3306"
+      - "5433:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d product_db"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -26,7 +25,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: ["redis-server", "--appendonly", "yes"]
 
   app:
     build:
@@ -41,14 +40,22 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      DB_URL: jdbc:mysql://db:3306/product_management
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:postgresql://db:5432/product_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:8080}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-phishingguardian.noreply@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-phishingguardian.noreply@gmail.com}
+      OTP_TTL_MINUTES: ${OTP_TTL_MINUTES:-5}
 
 volumes:
-  mysql_data:
+  postgres_data:
   redis_data:

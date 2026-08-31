@@ -6,14 +6,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,5 +50,16 @@ class OtpServiceTest {
 
         verify(redisService).delete("otp:user@example.com");
         assertEquals("123456", redisService.get("otp:user@example.com"));
+    }
+
+    @Test
+    void sendOtp_shouldFailWithClearMessageWhenRedisIsUnavailable() {
+        ReflectionTestUtils.setField(otpService, "otpTtlMinutes", 5L);
+        doThrow(new RedisConnectionFailureException("Connection refused")).when(redisService).save(any(), any(), any());
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> otpService.sendOtp("user@example.com"));
+
+        assertEquals("OTP service unavailable: Redis is not reachable.", exception.getMessage());
     }
 }

@@ -11,6 +11,7 @@ import com.Assessment.product_management_api.service.AuthService;
 import com.Assessment.product_management_api.service.OtpService;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,7 @@ public class AuthController {
         this(authService, null);
     }
 
+    @Autowired
     public AuthController(AuthService authService, OtpService otpService) {
         this.authService = authService;
         this.otpService = otpService;
