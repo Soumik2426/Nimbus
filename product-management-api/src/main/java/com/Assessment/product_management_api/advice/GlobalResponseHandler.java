@@ -14,7 +14,10 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object>{
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        // Springdoc generates the OpenAPI document as raw bytes. Wrapping that
+        // response in ApiResponse makes Spring select ByteArrayHttpMessageConverter
+        // and then fail with a ClassCastException.
+        return !returnType.getContainingClass().getPackageName().startsWith("org.springdoc");
     }
 
     @Override

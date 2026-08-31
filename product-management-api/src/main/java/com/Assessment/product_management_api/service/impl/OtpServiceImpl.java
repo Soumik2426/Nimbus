@@ -28,8 +28,22 @@ public class OtpServiceImpl implements OtpService {
     public String sendOtp(String email) {
         String otp = generateOtp();
         String key = otpKey(email);
-        redisService.save(key, otp, Duration.ofMinutes(otpTtlMinutes));
-        emailService.sendOtpEmail(email, otp);
+
+        try {
+            redisService.save(key, otp, Duration.ofMinutes(otpTtlMinutes));
+        } catch (Exception e) {
+            log.error("Failed to save OTP for email {} in Redis", email, e);
+            throw new IllegalStateException("OTP service unavailable: Redis is not reachable.", e);
+        }
+
+        try {
+            emailService.sendOtpEmail(email, otp);
+        } catch (Exception e) {
+            redisService.delete(key);
+            log.error("Failed to send OTP email for {}", email, e);
+            throw new IllegalStateException("OTP service unavailable: email delivery failed.", e);
+        }
+
         log.info("OTP generated and stored for email {}", email);
         return otp;
     }
