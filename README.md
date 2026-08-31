@@ -251,13 +251,13 @@ For evaluation and testing purposes, an administrator account has already been c
 **Email**
 
 ```text
-soumik@gmail.com
+soumikmaity2426@gmail.com
 ```
 
 **Password**
 
 ```text
-Your@Password123
+Sooumik@1234
 ```
 
 This account has full administrator privileges and can be used to test:
