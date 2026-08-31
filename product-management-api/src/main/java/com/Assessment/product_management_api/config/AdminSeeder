@@ -1,0 +1,40 @@
+package com.Assessment.product_management_api.config;
+
+import com.Assessment.product_management_api.entity.Role;
+import com.Assessment.product_management_api.entity.UserEntity;
+import com.Assessment.product_management_api.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class AdminSeeder {
+
+    @Bean
+    CommandLineRunner createDefaultAdmin(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${DEFAULT_ADMIN_EMAIL}") String adminEmail,
+            @Value("${DEFAULT_ADMIN_PASSWORD}") String adminPassword
+    ) {
+        return args -> {
+
+            if (!userRepository.existsByEmail(adminEmail)) {
+
+                UserEntity admin = UserEntity.builder()
+                        .firstName("Admin")
+                        .lastName("User")
+                        .email(adminEmail)
+                        .password(passwordEncoder.encode(adminPassword))
+                        .role(Role.ADMIN)
+                        .build();
+
+                userRepository.save(admin);
+
+                System.out.println("Default admin created.");
+            }
+        };
+    }
+}
