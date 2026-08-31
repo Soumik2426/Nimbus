@@ -31,3 +31,12 @@ export interface UserResponse {
   email: string;
   role: string;
 }
+
+export interface OtpRequest {
+  email: string;
+}
+
+export interface OtpVerificationRequest {
+  email: string;
+  otp: string;
+}
