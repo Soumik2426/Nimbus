@@ -29,14 +29,33 @@ A Spring Boot 3.5.x and Java 21 REST API for JWT-based authentication and produc
 - JJWT
 - ModelMapper
 - springdoc-openapi
-- JUnit 5, Mockito, Spring Security Test
-- H2 for repository tests
+- JUnit 5
+- Mockito
+- Spring Security Test
+- H2 Database (for repository tests)
 
 ## Architecture
 
 The application keeps a classic layered flow:
 
-Client -> Controller -> Service Interface -> Service Implementation -> Repository -> Database
+```
+Client
+   │
+   ▼
+Controller
+   │
+   ▼
+Service Interface
+   │
+   ▼
+Service Implementation
+   │
+   ▼
+Repository
+   │
+   ▼
+Database
+```
 
 Responses follow the reverse flow and are wrapped in `ApiResponse<T>` before reaching the client.
 
@@ -117,13 +136,15 @@ Use Docker Compose from the project root:
 docker compose up --build
 ```
 
-This starts the Spring Boot app and a MySQL container with a persistent volume.
+This starts the Spring Boot application and a MySQL container with a persistent volume.
 
 ## Swagger URL
 
 After the application starts, open:
 
-- `http://localhost:8080/swagger-ui/index.html`
+```
+http://localhost:8080/swagger-ui/index.html
+```
 
 ## Authentication Flow
 
@@ -132,7 +153,7 @@ After the application starts, open:
 3. Copy the returned JWT token.
 4. Send the token as a Bearer token in the `Authorization` header for protected product endpoints.
 
-Example header:
+Example:
 
 ```http
 Authorization: Bearer <jwt-token>
@@ -149,7 +170,9 @@ Authorization: Bearer <jwt-token>
 
 A Postman collection is included at:
 
-- `postman/Product-Management-API.postman_collection.json`
+```
+postman/Product-Management-API.postman_collection.json
+```
 
 It includes:
 
@@ -176,3 +199,73 @@ See `SCALABILITY.md` for the current architecture explanation and future scaling
 - Broader integration test coverage
 - Production database migration strategy
 - CI/CD pipeline automation
+
+---
+
+# Live Deployment
+
+The application is deployed and can be accessed online.
+
+## Live Website
+
+**Vercel**
+
+https://product-management-assessment.vercel.app
+
+## Backend API
+
+**Render**
+
+https://product-management-assessment-3ys8.onrender.com
+
+## Swagger Documentation
+
+https://product-management-assessment-3ys8.onrender.com/swagger-ui/index.html
+
+> **Note:** The backend is deployed on Render's free tier. If the application has been idle for some time, the first request may take around 30–60 seconds while the service wakes up.
+
+---
+
+# Administrator Access
+
+Every newly registered user is assigned the **USER** role by default.
+
+If administrator privileges are required for any newly registered account, the role must be **manually updated in the database** from:
+
+```
+USER
+```
+
+to
+
+```
+ADMIN
+```
+
+---
+
+## Demo Administrator Credentials
+
+For evaluation and testing purposes, an administrator account has already been created.
+
+**Email**
+
+```text
+soumik@gmail.com
+```
+
+**Password**
+
+```text
+Your@Password123
+```
+
+This account has full administrator privileges and can be used to test:
+
+- Product Creation
+- Product Update
+- Product Deletion
+- Product Management Features
+- User Role-Based Authorization
+
+> **Note:** These credentials are provided only for demonstration and evaluation purposes. In a production deployment, administrator credentials should be changed immediately and user role management should be performed through a secure administrative interface instead of directly modifying the database.

@@ -101,6 +101,11 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(auth -> auth
+                /*.requestMatchers(
+                        org.springframework.http.HttpMethod.OPTIONS,
+                        "/**"
+                ).permitAll()*/
+
                 .requestMatchers(
                         "/auth/registerUser",
                         "/auth/login",
