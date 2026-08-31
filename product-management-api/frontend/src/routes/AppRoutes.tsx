@@ -10,6 +10,7 @@ import LandingPage from "../pages/landing/LandingPage";
 
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import OtpVerificationPage from "../pages/auth/OtpVerificationPage";
 
 import DashboardPage from "../pages/dashboard/DashboardPage";
 
@@ -47,6 +48,11 @@ function AppRoutes() {
                 <Route
                     path="/register"
                     element={<RegisterPage />}
+                />
+
+                <Route
+                    path="/verify-otp"
+                    element={<OtpVerificationPage />}
                 />
 
             </Route>

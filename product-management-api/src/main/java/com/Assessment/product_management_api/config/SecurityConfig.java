@@ -109,8 +109,12 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/auth/registerUser",
                         "/auth/login",
+                        "/auth/send-otp",
+                        "/auth/verify-otp",
                         "/api/v1/auth/registerUser",
                         "/api/v1/auth/login",
+                        "/api/v1/auth/send-otp",
+                        "/api/v1/auth/verify-otp",
                         "/swagger-ui.html",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
